@@ -1,6 +1,6 @@
 baseURL = 'https://nitaystain.github.io/writeups/'
 languageCode = 'en'
-title = 'CTF Writeups'
+title = 'Nitay\'s Portfolio'
 theme = 'minimal'
 enableRobotsTXT = true
 buildFuture = true

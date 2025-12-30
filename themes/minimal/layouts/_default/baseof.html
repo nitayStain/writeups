@@ -15,7 +15,7 @@
 <body>
   <header class="site-header">
     <div class="container header-inner">
-      <a class="logo" href="{{ "/" | relURL }}">{{ site.Title }}</a>
+      <a class="logo" href="{{ "/" | absURL }}">{{ site.Title }}</a>
       {{- with site.Menus.main }}
       <nav>
         <ul class="nav-list">
