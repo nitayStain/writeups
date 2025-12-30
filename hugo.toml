@@ -4,7 +4,6 @@ title = "Nitay's Portfolio"
 theme = 'minimal'
 enableRobotsTXT = true
 buildFuture = true
-canonifyURLs = true
 
 [pagination]
   pagerSize = 10

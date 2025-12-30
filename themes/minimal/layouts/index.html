@@ -6,7 +6,7 @@
   {{- with site.Params.profileMode.buttons }}
   <div class="hero-buttons">
     {{- range . }}
-    <a class="button" href="{{ .url }}">{{ .name }}</a>
+    <a class="button" href="{{ printf "%s%s" site.BaseURL (strings.TrimPrefix "/" .url) }}">{{ .name }}</a>
     {{- end }}
   </div>
   {{- end }}
