@@ -9,7 +9,7 @@
   {{- if $desc }}
   <meta name="description" content="{{ $desc | plainify }}" />
   {{- end }}
-  <link rel="stylesheet" href="{{ "css/main.css" | relURL }}" />
+  <link rel="stylesheet" href="{{ "css/main.css" | absURL }}" />
 </head>
 
 <body>
@@ -20,7 +20,7 @@
       <nav>
         <ul class="nav-list">
           {{- range . }}
-          <li><a href="{{ .URL | relURL }}">{{ .Name }}</a></li>
+          <li><a href="{{ .URL | absURL }}">{{ .Name }}</a></li>
           {{- end }}
         </ul>
       </nav>
