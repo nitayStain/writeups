@@ -1,0 +1,34 @@
+{{ define "main" }}
+<section class="hero">
+  <p class="eyebrow">CTF Notes</p>
+  <h1>{{ site.Params.profileMode.title | default site.Title }}</h1>
+  <p class="lead">{{ site.Params.profileMode.subtitle | default site.Params.description }}</p>
+  {{- with site.Params.profileMode.buttons }}
+  <div class="hero-buttons">
+    {{- range . }}
+    <a class="button" href="{{ .url }}">{{ .name }}</a>
+    {{- end }}
+  </div>
+  {{- end }}
+</section>
+
+<section class="post-grid">
+  {{- $pages := where site.RegularPages "Type" "posts" }}
+  {{- range $pages.ByDate.Reverse }}
+  <article class="card">
+    <header>
+      <p class="meta">{{ .Date.Format "02 Jan 2006" }} • {{ .ReadingTime }} min read</p>
+      <h2><a href="{{ .RelPermalink }}">{{ .Title }}</a></h2>
+    </header>
+    <p>{{ .Params.summary | default .Summary | plainify }}</p>
+    {{- with .Params.tags }}
+    <ul class="tag-list">
+      {{- range . }}
+      <li><a href="{{ ( printf "/tags/%s/" (. | urlize) ) | relURL }}">#{{ . }}</a></li>
+      {{- end }}
+    </ul>
+    {{- end }}
+  </article>
+  {{- end }}
+</section>
+{{ end }}

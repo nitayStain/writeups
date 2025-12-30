@@ -1,0 +1,31 @@
+{{ define "main" }}
+<section class="page-header">
+  <h1>{{ .Title }}</h1>
+  {{- with .Content }}
+  <div class="lead">
+    {{ . }}
+  </div>
+  {{- end }}
+</section>
+
+<section class="post-grid">
+  {{- range .Paginator.Pages }}
+  <article class="card">
+    <header>
+      <p class="meta">{{ .Date.Format "02 Jan 2006" }} • {{- if .ReadingTime }} {{ .ReadingTime }} min read{{ end }}</p>
+      <h2><a href="{{ .RelPermalink }}">{{ .Title }}</a></h2>
+    </header>
+    <p>{{ .Params.summary | default .Summary | plainify }}</p>
+    {{- with .Params.tags }}
+    <ul class="tag-list">
+      {{- range . }}
+      <li><a href="{{ ( printf "/tags/%s/" (. | urlize) ) | relURL }}">#{{ . }}</a></li>
+      {{- end }}
+    </ul>
+    {{- end }}
+  </article>
+  {{- end }}
+</section>
+
+{{ template "_internal/pagination.html" . }}
+{{ end }}

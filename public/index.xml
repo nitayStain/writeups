@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>CTF Writeups</title>
+    <link>//localhost:1313/</link>
+    <description>Recent content on CTF Writeups</description>
+    <generator>Hugo</generator>
+    <language>en</language>
+    <lastBuildDate>Sat, 13 Dec 2025 10:00:00 +0200</lastBuildDate>
+    <atom:link href="//localhost:1313/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Patriot CTF 2025: Web Challenges</title>
+      <link>//localhost:1313/posts/patriot-ctf-2025-web-challenges/</link>
+      <pubDate>Sat, 13 Dec 2025 10:00:00 +0200</pubDate>
+      <guid>//localhost:1313/posts/patriot-ctf-2025-web-challenges/</guid>
+      <description>Writeups for Patriot CTF 2025&amp;rsquo;s Connection Tester SQLi chain and Trust Fall IDOR/API issues.</description>
+    </item>
+    <item>
+      <title>Null CTF 2025: Web Challenges</title>
+      <link>//localhost:1313/posts/null-ctf-2025-web-challenges/</link>
+      <pubDate>Fri, 12 Dec 2025 10:00:00 +0200</pubDate>
+      <guid>//localhost:1313/posts/null-ctf-2025-web-challenges/</guid>
+      <description>Notes from the Null CTF 2025 web challenges covering Next Jason&amp;rsquo;s auth bypass and JWT abuse.</description>
+    </item>
+  </channel>
+</rss>

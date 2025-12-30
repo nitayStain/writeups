@@ -1,0 +1,10 @@
+name = "MinimalCTF"
+license = "MIT"
+licenselink = "https://opensource.org/licenses/MIT"
+description = "Clean monochrome theme focused on readable CTF writeups."
+tags = ["blog", "minimal", "responsive"]
+features = ["blog", "responsive", "simple"]
+min_version = "0.120.0"
+
+[author]
+  name = "Nitay"
