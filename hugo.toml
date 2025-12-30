@@ -1,4 +1,4 @@
-baseURL = '/'
+baseURL = '/writeups'
 languageCode = 'en'
 title = 'CTF Writeups'
 theme = 'minimal'
