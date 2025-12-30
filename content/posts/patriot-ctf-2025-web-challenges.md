@@ -13,26 +13,26 @@ summary: "Writeups for Patriot CTF 2025's Connection Tester SQLi chain and Trust
 
 This is a classic **SQLI (SQL Injection)** challenge followed by a web shell.
 
-![Login page](/assets/Pasted%20image%2020251122030709.png)
+![Login page](/writeups/assets/Pasted%20image%2020251122030709.png)
 
 First thing is this login page. The first that goes in mind is to try a blind SQLI for the fun.
 Running ```' OR 1=1;--``` as the username and just a fake password redirects as us an admin user! yay!
 
-![Connectivity tool panel](/assets/Pasted%20image%2020251122030851.png)
+![Connectivity tool panel](/writeups/assets/Pasted%20image%2020251122030851.png)
 
 We are welcomed by this panel, not really interesting, but as a 'open connectivity tool' button. Let's press it!
 
-![Connectivity tester form](/assets/Pasted%20image%2020251122030925.png)
+![Connectivity tester form](/writeups/assets/Pasted%20image%2020251122030925.png)
 
 This is the final page. It's supposed to be a tool that connects to an IP, but when entering any ip it just shows a static message. 
 So, I tried fuzzing the input. Eventually, when entering a semicolon i finally saw another message:
 
-![Webshell response](/assets/Pasted%20image%2020251122031225.png)
+![Webshell response](/writeups/assets/Pasted%20image%2020251122031225.png)
 
 A webshell! amazing.
 Let's try a simple ls and cat:
 
-![Flag output](/assets/Pasted%20image%2020251122031302.png)
+![Flag output](/writeups/assets/Pasted%20image%2020251122031302.png)
 
 Here's the flag! easy one.
 
@@ -44,7 +44,7 @@ This is a classic **IDOR (Insecure Direct Object Reference)** challenge with a c
 
 I was presented a login-page, with weird placeholders applied to the inputs:
 
-![Trust Fall login page](/assets/Pasted%20image%2020251122032039.png)
+![Trust Fall login page](/writeups/assets/Pasted%20image%2020251122032039.png)
 
 First thing I tried was trying these as the input, and as expected it worked!
 
